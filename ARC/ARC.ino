@@ -1,74 +1,67 @@
-//#include <Servo.h> 
-//Servo camServo;
-//int pos = 0;
+#define motorRF 2
+#define motorRB 3
+#define motorLF 4
+#define motorLB 5
+#define linkFF 22
+#define linkFB 23
+#define linkBF 24
+#define linkBB 25
+#define gripperlock 26
+#define gripperunlock 27
+#define gripperturnR 6
+#define gripperturnL 7
+#define linearup1 28
+#define lineardown1 29
+#define linearup2 30
+#define lineardown2 31
+#define linearup3 32
+#define lineardown3 33
+#define armR 8
+#define armL 9
 
-//#include <SoftwareSerial.h>
-//SoftwareSerial IP(11,12); // RX, TX
-//char IPData;
 
+
+void up(int motorF,int motorB);
+void down(int motorF,int motorB);
+void forward(int motorf,int motorb,int pwm);
+void backward(int motorf,int motorb,int pwm);
+void stop_motors();
+void stopmove();
+
+int pwm = 150;
 
 char serialData;
 
 int motor_plus_speed = 0;
 
-int motor1up = 4; //right
-int motor1down = 5;
-int motor11up = 8; //right
-int motor11down = 9;
+int motor1up = 5; //right
+int motor1down = 6;
+int motor1speed=9;
 
-int motor2up = 6; //left
-int motor2down = 7;
-int motor22up = 10; //left
-int motor22down = 11;
+int motor2up = 7; //left
+int motor2down = 8;
+int motor2speed=10;
 
 //int reset_button =13; // connected to reset pin with high voltage, the arduino will restart if it has LOW voltage
 
 void setup() {
   
-  //IP.begin(9600);
   Serial.begin(9600);
   //Serial.setTimeout(2000);
 
-  //camServo.attach(3);
-  //camServo.write(90);
+
   
   pinMode(motor1up, OUTPUT);
-  pinMode(motor11up, OUTPUT);
   pinMode(motor1down, OUTPUT);
-  pinMode(motor11down, OUTPUT);
-  
+  pinMode(motor1speed, OUTPUT);
   pinMode(motor2up, OUTPUT);
-  pinMode(motor22up, OUTPUT);
   pinMode(motor2down, OUTPUT);
-  pinMode(motor22down, OUTPUT);
+  pinMode(motor2speed, OUTPUT);
   
 
-//  pinMode(reset_button, OUTPUT); 
-//  digitalWrite(reset_button, HIGH); 
+
 }
 
-void motors(int motor1,int motor11,int motor2,int motor22,int speed1,int speed2) {
-      int speed1_a = speed1 + motor_plus_speed;
-      speed1_a =min(speed1_a,255);
-      
-      int speed2_b = speed2 + motor_plus_speed;
-      speed2_b =min(speed2_b,255);
-      
-      analogWrite(motor1,speed1_a);
-      analogWrite(motor11,speed1_a);
-      analogWrite(motor2,speed2_b);
-      analogWrite(motor22,speed2_b);
-}
-void stopmotors(){
-      analogWrite(motor1up,0);
-      analogWrite(motor1down,0);
-      analogWrite(motor11up,0);
-      analogWrite(motor11down,0);
-      analogWrite(motor2up,0);
-      analogWrite(motor2down,0);
-      analogWrite(motor22up,0);
-      analogWrite(motor22down,0);
-}  
 void loop() { // run over and over
   if (Serial.available())
   {
@@ -76,72 +69,176 @@ void loop() { // run over and over
 
     switch (serialData)
     {
-    case 'w': // W = go forward
-      motors(motor1up,motor11up,motor2up,motor22up,180,180);
+    case 'F': // F =  go forward
+      forward(motorRF,motorRB,pwm);
+      forward(motorLF,motorLB,pwm);
       break; 
-    case's':  // s =  go back
-      motors(motor1down,motor11down,motor2down,motor22down,180,180);
-      break;
-    case'd' : // d =  right
-      motors(motor1down,motor11down,motor2up,motor22up,190,190);
-      break;
-    case'a':  // a =  left
-      motors(motor1up,motor11up,motor2down,motor22down,190,190);
-      break;
+    case'B':  // B =  go back
+      backward(motorRF,motorRB,pwm);
+      backward(motorLF,motorLB,pwm);
+      break; 
+    case'R' : // R =  right
+      forward(motorRF,motorRB,0);
+      forward(motorLF,motorLB,200);
+      break; 
+    case 'L':  // L =  left
+      forward(motorRF,motorRB,200);
+      forward(motorLF,motorLB,0);
+      break; 
 
-    case'm' : // M =  top right
-      motors(motor1up,motor11up,motor2up,motor22up,70,160);
+    case 's':
+      stopmove();
       break;
-    case'v':  // v =  top left
-      motors(motor1up,motor11up,motor2up,motor22up,160,70);
-      break;
-
-
-    case'S': // S = STOP 
-      stopmotors();
-      break;
-      
-/*    case'K': // move camera to right
-      pos += 10;
-      pos=min(pos,180);
-      camServo.write(pos);
-      //IP.println(pos);
-      break;
-    case'D': // move camera to left
-      pos -= 10;
-      pos=max(pos,0);
-      camServo.write(pos);
-      //IP.println(pos);
-      break;  
-*/
-    case'I': // I up the speed
-      motor_plus_speed += 30;
-      motor_plus_speed=min(motor_plus_speed,135);
-      //IP.println(motor_plus_speed);
-      break;
-    case'E': // E down the speed
-      motor_plus_speed -= 30;
-      motor_plus_speed=max(motor_plus_speed,0);
-      //IP.println(motor_plus_speed);
-      break;  
-
-
-
-         
-    /*case'U': // u = reset the arduino
-      digitalWrite(reset_button,LOW);
-      break;*/
-
     
+    case 'O' : // O = +10 pwm 
+      pwm+=10;
+      pwm = min(pwm,255);
+      break; 
+   
+    case 'P':  // P =  -10 pwm
+      pwm-=10;
+      pwm = max(pwm,0);
+      break; 
+
+
+    case 'Q':   //Q = reset
+      pwm = 150;
+      break;
+ 
+    
+    case 'T':  // T = link front up
+      up(linkFF,linkFB);
+      break; 
+
+    case 'U': // U = link front down
+      down(linkFF,linkFB);
+      break;
+
+    case 'V' : // V = link back up
+      up(linkBF,linkBB);
+      break; 
+
+    case 'W' : // V = link back up
+      down(linkBF,linkBB);
+      break; 
+    
+
+
+   
+    case 'A':  // A = gripper right
+      up(gripperturnR,linkFB);
+      break; 
+
+    case 'C': // C = gripper left
+      down(gripperturnL,linkFB);
+      break;
+
+    case 'D' : // D = gripper unlock
+      up(gripperunlock,linkBB);
+      break; 
+
+    case 'E' : // E = gripper lock
+      down(gripperlock,linkBB);
+      break; 
+
+
+    case 'I':  // I = linear 1 up
+      up(linearup1,lineardown1);
+      break; 
+
+    case 'J': // j = liear 1 down
+      down(linearup1,lineardown1);
+      break;
+
+    case 'K' : // K = linear 2 up
+      up(linearup2,lineardown2);
+      break; 
+
+    case 'Y' : // Y = liear 2 down
+      down(linearup2,lineardown2);
+      break; 
+    
+    case 'M' : // M = linear 3 up
+      up(linearup3,lineardown3);
+      break; 
+
+    case 'N' : // N = liear 3 down
+      down(linearup3,lineardown3);
+      break; 
+
+
+    case 'G' : // G = arm right
+      up(armR,armL);
+      break; 
+
+    case 'H' : // H = arm left
+      down(armR,armL);
+      break; 
+    case 'S':
+      stop_motors();
+      break;
     default :
-      stopmotors();
+      stop_motors();
       break;
   }
-Serial.println("ahmed");
   
-}
+ }
 
  delay(100);
+ stopmove();
 
+ 
+}
+
+
+void up(int motorF,int motorB) {
+
+      
+      digitalWrite(motorF, HIGH);
+      digitalWrite(motorB, LOW);
+}
+void down(int motorF,int motorB) {
+
+      
+      digitalWrite(motorF, LOW);
+      digitalWrite(motorB, HIGH);
+}
+void forward(int motorf,int motorb,int pwm){
+      analogWrite(motorf, pwm);
+      analogWrite(motorb, 0);
+}
+void backward(int motorf,int motorb,int pwm){
+      analogWrite(motorb, pwm);
+      analogWrite(motorf, 0);
+}
+
+void stop_motors(){
+      digitalWrite(motorRF, LOW);
+      digitalWrite(motorRB, LOW);
+      digitalWrite(motorLF, LOW);
+      digitalWrite(motorLB, LOW);
+      digitalWrite(linkFF, LOW);
+      digitalWrite(linkFB, LOW);
+      digitalWrite(linkBF, LOW);
+      digitalWrite(linkBB, LOW);
+      digitalWrite(gripperlock, LOW);
+      digitalWrite(gripperunlock, LOW);
+      digitalWrite(gripperturnR, LOW);
+      digitalWrite(gripperturnL, LOW);
+      digitalWrite(linearup1, LOW);
+      digitalWrite(lineardown1, LOW);
+      digitalWrite(linearup2, LOW);
+      digitalWrite(lineardown2, LOW);
+      digitalWrite(linearup3, LOW);
+      digitalWrite(lineardown3, LOW);
+      digitalWrite(armR, LOW);
+      digitalWrite(armL, LOW);
+
+}  
+void stopmove(){
+      digitalWrite(motorRF, LOW);
+      digitalWrite(motorRB, LOW);
+      digitalWrite(motorLF, LOW);
+      digitalWrite(motorLB, LOW);
 }
 

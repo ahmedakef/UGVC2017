@@ -1,6 +1,15 @@
 # this code to chat between to process in the same machine
 
 import socket               # Import socket module
+import serial
+
+try:
+        usbport="/dev/ttyACM0"
+        ser = serial.Serial(usbport,9600)
+except:
+        usbport="/dev/ttyACM1"
+        ser = serial.Serial(usbport,9600)
+
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)         # Create a socket object
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # make the port reusable after closing it quickly
@@ -16,6 +25,7 @@ c.send('Thank you for connecting')
 
 while True:
     data=c.recv(1024)
+    ser.write(data)         # send data to arduino using serial communication
     print("i have recieved %s" % data )
 
     c.send('hey client , i have recieved %s' % data)

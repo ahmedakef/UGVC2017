@@ -14,7 +14,7 @@ except:
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)         # Create a socket object
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # make the port reusable after closing it quickly
 
-host = "192.168.0.102"      # put your machine IP
+host = "192.168.0.105"      # put your machine IP
 port = 12345                # Reserve a port for your service.
 s.bind((host, port))        # Bind to the port
 

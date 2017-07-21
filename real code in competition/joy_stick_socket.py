@@ -6,7 +6,7 @@ import socket               # Import socket module
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)         # Create a socket object
 
 port = 12345                     # Reserve a port for the service.
-host = "192.168.0.102"           # host name or adress of the \
+host = "192.168.0.105"           # host name or adress of the \
                                  # target machine
 
 
